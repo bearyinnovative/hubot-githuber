@@ -2,7 +2,7 @@
 
 do some github stuff by hubot
 
-See [`src/githuber.coffee`](src/githuber.coffee) for full documentation.
+See [`src/githuber.js`](src/githuber.js) for full documentation.
 
 ## Installation
 
@@ -18,12 +18,10 @@ Then add **hubot-githuber** to your `external-scripts.json`:
 ]
 ```
 
-## Sample Interaction
+## Environments
 
-```
-user1>> hubot hello
-hubot>> hello!
-```
+1. set `HUBOT_GITHUBER_JSON_FILE="a json file path that store all access token"` (optional, otherwise hubot will use his brain)
+2. set `HUBOT_GITHUBER_ACCOUNT="account name for all repo"` (required, both user and organization are acceptable)
 
 ## NPM Module
 
