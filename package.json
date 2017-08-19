@@ -1,7 +1,7 @@
 {
   "name": "hubot-githuber",
   "description": "do some github stuff by hubot",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "loddit <loddit@gmail.com>",
   "license": "MIT",
   "keywords": "github hubot",
