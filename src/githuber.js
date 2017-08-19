@@ -10,7 +10,8 @@
 //
 // hubot github token - Set Your GitHub Personal access tokens (please use this commend in hubot p2p for safety reasons)
 // hubot github issue new [repo_name] - Add new issue for repo.
-// hubot github issue list [repo_name] - List all issues for repo.
+// hubot github issue list [repo_name] - List all issues for a repo.
+// hubot github issue mine [repo_name] - List all issues assigned to me for a repo.
 // hubot github issue/pr close [repo_name] [#number] - Close a issue/pull request for repo.
 // hubot github issue/pr lgtm [repo_name] [#number] - Comment a issue/pull request with LGTM.
 // hubot github issue/pr comment [repo_name] [#number] - Comment a issue/pull request with you words.
@@ -31,6 +32,11 @@ const dataFilePath = process.env.HUBOT_GITHUBER_JSON_FILE;
 
 const account =  process.env.HUBOT_GITHUBER_ACCOUNT || '';
 const sessions = {};
+
+
+function getQueryString(obj) {
+  return "?" + Object.keys(obj).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`).join('&');
+}
 
 module.exports = (robot) => {
   function getToken (res) {
@@ -62,6 +68,20 @@ module.exports = (robot) => {
       saveData({});
     }
   })();
+
+  function getMyself(token, callback) {
+    robot.http(`https://api.github.com/user`)
+      .header('Content-Type', 'application/json')
+      .header('Authorization', `token ${token}`)
+      .get()((_err, _res, body) => {
+        const data = JSON.parse(body)
+        if (data.message) {
+          res.reply(data.message);
+        } else {
+          callback(data);
+        }
+      });
+  }
 
   function createRelease(tag_name, title, body, prerelease, res, token, account, repo) {
     const data = JSON.stringify({
@@ -110,6 +130,31 @@ module.exports = (robot) => {
             attachments: [{
               text: `${comment.body} \n [${comment.user.login}](${comment.user.html_url}) ${moment(comment.created_at).format('YYYY-MM-DD h:mm:ss a')}`
             }]
+          });
+        }
+      });
+  }
+
+  function getIssues(params, res, token, account, repo) {
+    const issueAPIUrl = `https://api.github.com/repos/${account}/${repo}/issues`
+    const url = params ? issueAPIUrl + getQueryString(params) : issueAPIUrl;
+    robot.http(url)
+      .header('Content-Type', 'application/json')
+      .header('Authorization', `token ${token}`)
+      .get()((_err, _res, body) => {
+        const data = JSON.parse(body)
+        if (data.message) {
+          res.reply(data.message);
+        } else {
+          robot.emit('bearychat.attachment', {
+            message: res.message,
+            text: `${repo} issues:`,
+            attachments: data.map((issue) => {
+              return {
+                title: issue.title,
+                text: `[#${issue.number}](${issue.html_url}) created by [${issue.user.login}](${issue.user.html_url}) ${moment(issue.created_at).format('YYYY-MM-DD h:mm:ss a')}`
+              };
+            })
           });
         }
       });
@@ -214,26 +259,18 @@ module.exports = (robot) => {
     if (!token) {
       return res.reply("setup your access token with `github token` cmd first");
     }
-    robot.http(`https://api.github.com/repos/${account}/${repo}/issues`)
-      .header('Content-Type', 'application/json')
-      .header('Authorization', `token ${token}`)
-      .get()((_err, _res, body) => {
-        const data = JSON.parse(body)
-        if (data.message) {
-          res.reply(data.message);
-        } else {
-          robot.emit('bearychat.attachment', {
-            message: res.message,
-            text: `${repo} issue list`,
-            attachments: data.map((issue) => {
-              return {
-                title: issue.title,
-                text: `[#${issue.number}](${issue.html_url}) created by [${issue.user.login}](${issue.user.html_url}) ${moment(issue.created_at).format('YYYY-MM-DD h:mm:ss a')}`
-              };
-            })
-          });
-        }
-      });
+    getIssues(null, res, token, account, repo);
+  });
+
+  robot.respond(/github issue mine (.+)/i, (res) => {
+    const repo = res.match[1];
+    const token = getToken(res);
+    if (!token) {
+      return res.reply("setup your access token with `github token` cmd first");
+    }
+    getMyself(token, (myself) => {
+      getIssues({assignee: myself.login}, res, token, account, repo);
+    })
   });
 
   robot.respond(/github issue create (.+)/i, (res) => {
