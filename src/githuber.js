@@ -12,6 +12,7 @@
 // hubot github issue new [repo_name] - Add new issue for repo.
 // hubot github issue list [repo_name] - List all issues for a repo.
 // hubot github issue mine [repo_name] - List all issues assigned to me for a repo.
+// hubot github issue all - List all issues assigned to me for a orgs.(if your account is a organization)
 // hubot github issue/pr close [repo_name] [#number] - Close a issue/pull request for repo.
 // hubot github issue/pr lgtm [repo_name] [#number] - Comment a issue/pull request with LGTM.
 // hubot github issue/pr comment [repo_name] [#number] - Comment a issue/pull request with you words.
@@ -271,6 +272,35 @@ module.exports = (robot) => {
     getMyself(token, (myself) => {
       getIssues({assignee: myself.login}, res, token, account, repo);
     })
+  });
+
+  robot.respond(/github issue all/i, (res) => {
+    const repo = res.match[1];
+    const token = getToken(res);
+    if (!token) {
+      return res.reply("setup your access token with `github token` cmd first");
+    }
+    const queryString = getQueryString({filter: "assigned"});
+    robot.http(`https://api.github.com/orgs/${account}/issues${queryString}`)
+      .header('Content-Type', 'application/json')
+      .header('Authorization', `token ${token}`)
+      .get()((_err, _res, body) => {
+        const data = JSON.parse(body)
+        if (data.message) {
+          res.reply(data.message);
+        } else {
+          robot.emit('bearychat.attachment', {
+            message: res.message,
+            text: `all ${account} issues assigned to me:`,
+            attachments: data.map((issue) => {
+              return {
+                title: issue.title,
+                text: `[${issue.repository.name}](${issue.repository.html_url}) [#${issue.number}](${issue.html_url}) created by [${issue.user.login}](${issue.user.html_url}) ${moment(issue.created_at).format('YYYY-MM-DD h:mm:ss a')}`
+              };
+            })
+          });
+        }
+      });
   });
 
   robot.respond(/github issue create (.+)/i, (res) => {
