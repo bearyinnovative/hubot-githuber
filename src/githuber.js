@@ -13,10 +13,10 @@
 // hubot github issue list [repo_name] - List all issues for a repo.
 // hubot github issue mine [repo_name] - List all issues assigned to me for a repo.
 // hubot github issue all - List all issues assigned to me for a orgs.(if your account is a organization)
-// hubot github issue/pr close [repo_name] [#number] - Close a issue/pull request for repo.
-// hubot github issue/pr lgtm [repo_name] [#number] - Comment a issue/pull request with LGTM.
-// hubot github issue/pr comment [repo_name] [#number] - Comment a issue/pull request with you words.
-// hubot github pr list [repo_name] -  List all pull requests for repo.
+// hubot github issue close [repo_name] [#number] - Close a issue/pull request for repo.
+// hubot github issue lgtm [repo_name] [#number] - Comment a issue/pull request with LGTM.
+// hubot github issue comment [repo_name] [#number] - Comment a issue/pull request with you words.
+// hubot github issue pr [repo_name] -  List all pull requests for repo.
 // hubot github release new [repo_name] - Create new release for repo.
 // hubot github release latest [repo_name] - Show latest release for repo.
 // hubot github release check [repo_name] - List new merged pull requests after latest release.
@@ -317,7 +317,7 @@ module.exports = (robot) => {
     }
   });
 
-  robot.respond(/github [issue/pr] close (.+) (\d+)/i, (res) => {
+  robot.respond(/github issue close (.+) (\d+)/i, (res) => {
     const repo = res.match[1];
     const number = res.match[2];
     const token = getToken(res);
@@ -345,7 +345,7 @@ module.exports = (robot) => {
       });
   });
 
-  robot.respond(/github pr list (.+)/i, (res) => {
+  robot.respond(/github issue pr (.+)/i, (res) => {
     const repo = res.match[1];
     const token = getToken(res);
     if (!token) {
