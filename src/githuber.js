@@ -152,7 +152,7 @@ module.exports = (robot) => {
             text: `${repo} issues:`,
             attachments: data.map((issue) => {
               return {
-                title: issue.title,
+                title: `${issue.title}${issue.pull_request ? " (Pull Request)" : ''}`,
                 text: `[#${issue.number}](${issue.html_url}) created by [${issue.user.login}](${issue.user.html_url}) ${moment(issue.created_at).format('YYYY-MM-DD h:mm:ss a')}`
               };
             })
@@ -294,7 +294,7 @@ module.exports = (robot) => {
             text: `all ${account} issues assigned to me:`,
             attachments: data.map((issue) => {
               return {
-                title: issue.title,
+                title: `${issue.title}${issue.pull_request ? " (Pull Request)" : ''}`,
                 text: `[${issue.repository.name}](${issue.repository.html_url}) [#${issue.number}](${issue.html_url}) created by [${issue.user.login}](${issue.user.html_url}) ${moment(issue.created_at).format('YYYY-MM-DD h:mm:ss a')}`
               };
             })
