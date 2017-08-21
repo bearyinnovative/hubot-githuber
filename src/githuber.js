@@ -180,12 +180,12 @@ module.exports = (robot) => {
     if (sessions[uid]) {
       const token = getToken(res);
       switch (sessions[uid].step) {
-        case "issue-create-title":
+        case "issue-new-title":
           sessions[uid]["title"] = answer;
-          sessions[uid]["step"] = "issue-create-body";
-          res.send("What is the body of your issue");
+          sessions[uid]["step"] = "issue-new-body";
+          res.send("What is the body of your issue?");
           return;
-        case "issue-create-body":
+        case "issue-new-body":
           sessions[uid]["body"] = answer;
           var repo = sessions[uid]["repo"];
           var data = JSON.stringify({
@@ -204,7 +204,7 @@ module.exports = (robot) => {
                 const issue = data;
                 robot.emit('bearychat.attachment', {
                   message: res.message,
-                  text: `${repo} issue opened`,
+                  text: `${repo} issue opened:`,
                   attachments: [{
                     title: issue.title,
                     text: `[#${issue.number}](${issue.html_url}) created by [${issue.user.login}](${issue.user.html_url}) ${moment(issue.created_at).format('YYYY-MM-DD h:mm:ss a')} \n ${issue.body}`
@@ -303,7 +303,7 @@ module.exports = (robot) => {
       });
   });
 
-  robot.respond(/github issue create (.+)/i, (res) => {
+  robot.respond(/github issue new (.+)/i, (res) => {
     const repo = res.match[1];
     const token = getToken(res);
     if (!token) {
@@ -312,7 +312,7 @@ module.exports = (robot) => {
     res.send("What is the title of your issue?");
     const uid = res.message.user.id;
     sessions[uid] = {
-      step: "issue-create-title",
+      step: "issue-new-title",
       repo: repo
     }
   });
