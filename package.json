@@ -7,10 +7,10 @@
   "keywords": "github hubot",
   "repository": {
     "type": "git",
-    "url": "git://github.com/hubot-scripts/hubot-githuber.git"
+    "url": "git://github.com/bearyinnovative/hubot-githuber.git"
   },
   "bugs": {
-    "url": "https://github.com/hubot-scripts/hubot-githuber/issues"
+    "url": "https://github.com/bearyinnovative/hubot-githuber/issues"
   },
   "dependencies": {
     "legilimens": "^0.1.3",
