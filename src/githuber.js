@@ -178,6 +178,11 @@ module.exports = (robot) => {
     const answer = res.match[1].replace(robot.name + " ", '');
     const uid = res.message.user.id;
     if (sessions[uid]) {
+      if (answer === "exit" || answer === "quit") {
+        sessions[uid] = null;
+        res.send("OK, I will ignore you.");
+        return;
+      };
       const token = getToken(res);
       switch (sessions[uid].step) {
         case "issue-new-title":
